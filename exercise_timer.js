@@ -241,7 +241,7 @@ async function speakThenWait(text, totalMs) {
 // ═══════════════════════════════════════════════════════════════════════════
 // UI HELPERS
 // ═══════════════════════════════════════════════════════════════════════════
-const CIRCUMFERENCE = 2 * Math.PI * 48; // r=48
+const CIRCUMFERENCE = 2 * Math.PI * 42; // r=42
 
 function setTag(cls, text) {
   const el = document.getElementById('status-tag');

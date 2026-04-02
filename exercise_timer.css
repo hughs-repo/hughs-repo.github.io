@@ -40,10 +40,10 @@
   .app {
     width: 100%;
     max-width: 680px;
-    padding: 32px 20px 60px;
+    padding: 24px 16px 16px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
   }
 
   /* ── Header ── */
@@ -79,7 +79,7 @@
   }
 
   /* ── Setup screen ── */
-  #screen-setup  { display: none; flex-direction: column; gap: 20px; }
+  #screen-setup  { display: none; flex-direction: column; gap: 16px; }
   #screen-setup.screen-active  { display: flex; }
 
   .upload-zone {
@@ -178,13 +178,16 @@
     letter-spacing: 0.02em;
     transition: var(--transition);
     box-shadow: 0 4px 16px rgba(45,106,79,0.3);
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
   }
   .btn-start:hover { background: #235c42; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,106,79,0.35); }
   .btn-start:active { transform: translateY(0); }
   .btn-start:disabled { background: var(--ink-faint); box-shadow: none; cursor: not-allowed; transform: none; }
 
   /* ── Session screen ── */
-  #screen-session { display: none; flex-direction: column; gap: 20px; }
+  #screen-session { display: none; flex-direction: column; gap: 16px; }
   #screen-session.screen-active { display: flex; }
 
   /* Progress bar */
@@ -210,7 +213,7 @@
   /* Status card — the main display */
   .status-card {
     text-align: center;
-    padding: 36px 28px;
+    padding: 20px 20px;
   }
   .status-tag {
     display: inline-block;
@@ -220,7 +223,7 @@
     text-transform: uppercase;
     padding: 4px 12px;
     border-radius: 99px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
   }
   .tag-intro    { background: var(--gold-light);   color: var(--gold); }
   .tag-ready    { background: var(--surface2);      color: var(--ink-soft); }
@@ -230,14 +233,14 @@
 
   .status-main {
     font-family: 'DM Serif Display', serif;
-    font-size: clamp(2.2rem, 8vw, 3.6rem);
+    font-size: clamp(1.8rem, 7vw, 2.8rem);
     line-height: 1.1;
     letter-spacing: -0.02em;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     min-height: 1.2em;
   }
   .status-sub {
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     color: var(--ink-soft);
     font-weight: 400;
     min-height: 1.4em;
@@ -247,11 +250,11 @@
   .count-ring-wrap {
     display: flex;
     justify-content: center;
-    margin: 20px 0 8px;
+    margin: 12px 0 4px;
   }
   .count-ring {
     position: relative;
-    width: 110px; height: 110px;
+    width: 96px; height: 96px;
   }
   .count-ring svg { transform: rotate(-90deg); }
   .count-ring circle {
@@ -260,7 +263,7 @@
   }
   .ring-bg    { stroke: var(--surface2); }
   .ring-fill  { stroke: var(--accent); stroke-linecap: round;
-                stroke-dasharray: 301.6;
+                stroke-dasharray: 263.9;
                 stroke-dashoffset: var(--dash-offset, 0);
                 transition: stroke-dashoffset 0.9s linear; }
   .ring-fill.relax { stroke: var(--warn); }
@@ -320,8 +323,8 @@
   .log {
     background: var(--surface2);
     border-radius: var(--radius);
-    padding: 14px 16px;
-    max-height: 140px;
+    padding: 12px 14px;
+    max-height: 100px;
     overflow-y: auto;
     font-size: 0.8rem;
     color: var(--ink-soft);
@@ -334,6 +337,11 @@
   .controls {
     display: flex;
     gap: 12px;
+    position: sticky;
+    bottom: 0;
+    background: var(--bg);
+    padding: 12px 0 4px;
+    z-index: 10;
   }
   .btn-pause {
     flex: 1;
