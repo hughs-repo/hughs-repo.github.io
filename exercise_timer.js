@@ -455,10 +455,10 @@ async function runSession(exercises) {
           setRing(true, 0, false);
           setRingNum(1);
 
-          // Say "OK." and wait for the remainder of the first beat,
-          // then say the activity name ("Pull" etc.) at the 1-second mark,
+          // Say "OK." and wait for the remainder of the first two beats,
+          // then say the activity name ("Pull" etc.) at the 2-second mark,
           // followed by the numeric count — all evenly spaced at 1-second intervals.
-          await speakThenWait('OK.', 1000);
+          await speakThenWait('OK.', 2000);
 
           for (let count = 1; count <= fa.holdTime && !stopped; count++) {
             // Ring fills up: empty at count=1, full at count=holdTime
