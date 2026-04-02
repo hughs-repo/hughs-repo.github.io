@@ -203,6 +203,27 @@ function cancelSpeech() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// SCREEN WAKE LOCK  —  keep the screen on while the session is running
+// ═══════════════════════════════════════════════════════════════════════════
+let wakeLock = null;
+
+async function acquireWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+  } catch (_) {
+    // Permission denied or not supported — silently ignore
+  }
+}
+
+async function releaseWakeLock() {
+  if (wakeLock) {
+    try { await wakeLock.release(); } catch (_) { /* ignore */ }
+    wakeLock = null;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // TIMING  —  pause-aware sleep using wall-clock accumulation
 // ═══════════════════════════════════════════════════════════════════════════
 let paused  = false;
@@ -564,12 +585,14 @@ function startSession() {
   document.getElementById('log').innerHTML = '';
   document.getElementById('rep-dots').innerHTML = '';
   showScreen('screen-session');
+  acquireWakeLock();
   startClock(activeExercises);
   runSession(activeExercises);
 }
 
 function endSession() {
   const elapsed = stopClock();
+  releaseWakeLock();
   cancelSpeech();
   const durStr = formatDuration(elapsed);
   document.getElementById('done-time').textContent = `Total time: ${durStr}`;
@@ -581,6 +604,7 @@ function stopSession() {
   stopped = true;
   paused  = false;
   setPaused(false);
+  releaseWakeLock();
   cancelSpeech();
   stopClock();
   document.getElementById('progress-fill').style.setProperty('--progress-pct', '0%');
@@ -597,7 +621,12 @@ function setPaused(val) {
   overlay.classList.toggle('active', val);
   btn.classList.toggle('paused', val);
   btn.textContent = val ? '▶ Resume' : '⏸ Pause';
-  if (val) cancelSpeech();
+  if (val) {
+    cancelSpeech();
+    releaseWakeLock();
+  } else if (!stopped) {
+    acquireWakeLock();
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -840,6 +869,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.code === 'Space' && document.getElementById('screen-session').classList.contains('screen-active')) {
       e.preventDefault();
       setPaused(!paused);
+    }
+  });
+
+  // Re-acquire wake lock if the page becomes visible again while session is running
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && !stopped && !paused) {
+      acquireWakeLock();
     }
   });
 });
