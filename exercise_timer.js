@@ -64,6 +64,27 @@ intro      = When I tell you, move your right leg to the right, tensioning the b
 hold_time  = 5
 relax_time = 5
 reps       = 10
+
+[exercise.4]
+name                = Double heel leg rise
+requirement         = With this exercise you will be standing straight and perhaps gently holding on to a table or chair for balance. You will rise up on your toes, keeping your legs straight and relax.
+between_focus_time  = 15
+sets                = 2
+activity            = Rise
+
+[exercise.4.focus.1]
+name       =
+intro      = When I tell you, rise up on your toes, and then relax back down
+hold_time  = 2
+relax_time = 2
+reps       = 15
+
+[exercise.4.focus.2]
+name       =
+intro      = When I tell you, rise up on your toes, and then relax back down
+hold_time  = 2
+relax_time = 2
+reps       = 15
 `;
 
 // ═══════════════════════════════════════════════════════════════════════════
