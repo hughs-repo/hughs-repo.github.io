@@ -73,14 +73,7 @@ sets                = 2
 activity            = Rise
 
 [exercise.4.focus.1]
-name       =
-intro      = When I tell you, rise up on your toes, and then relax back down
-hold_time  = 2
-relax_time = 2
-reps       = 15
-
-[exercise.4.focus.2]
-name       =
+name       = both legs
 intro      = When I tell you, rise up on your toes, and then relax back down
 hold_time  = 2
 relax_time = 2
@@ -171,6 +164,12 @@ const COUNT_WORDS = ['','one','two','three','four','five','six','seven',
 
 function countWord(n) { return COUNT_WORDS[n] || String(n); }
 function plural(n, s, p) { return n === 1 ? `1 ${s}` : `${n} ${p || s+'s'}`; }
+function pluralWord(w) {
+  const lw = w.toLowerCase();
+  if (/(?:s|sh|ch|x|z)$/.test(lw)) return lw + 'es';
+  if (/e$/.test(lw)) return lw + 's';
+  return lw + 's';
+}
 function titleCase(s) { return s.replace(/\b\w/g, c => c.toUpperCase()); }
 function formatDuration(sec) {
   sec = Math.round(sec);
@@ -500,7 +499,7 @@ async function runSession(exercises) {
           // Say "OK." and wait for the remainder of the first two beats,
           // then say the activity name ("Pull" etc.) at the 2-second mark,
           // followed by the numeric count — all evenly spaced at 1-second intervals.
-          await speakThenWait('OK.', 2000);
+          await speakThenWait('OK.', 1500);
 
           for (let count = 1; count <= fa.holdTime && !stopped; count++) {
             // Ring fills up: empty at count=1, full at count=holdTime
@@ -519,7 +518,9 @@ async function runSession(exercises) {
             setSub(`Completed all ${fa.reps} reps`);
             setRing(false);
             log(`    ✓ Completed ${fa.reps} reps`);
-            await speak(`And relax. That was stretch ${fa.reps} of ${fa.reps}. Well done.`);
+            await speak(fa.relaxTime < 4
+              ? 'And relax. Well done.'
+              : `And relax. That was stretch ${fa.reps} of ${fa.reps}. Well done.`);
             await sleep(1500);
             tickProgress();
           } else {
@@ -531,7 +532,9 @@ async function runSession(exercises) {
 
             // Speak the relax message, then run a single pause-aware
             // countdown loop that is the ONLY source of truth for timing.
-            await speak(`Relax. That was stretch ${rep} of ${fa.reps}.`);
+            await speak(fa.relaxTime < 4
+              ? 'Relax.'
+              : `Relax. That was stretch ${rep} of ${fa.reps}.`);
 
             const relaxMs = fa.relaxTime * 1000;
             let   relaxElapsed = 0;
@@ -713,9 +716,7 @@ function renderExerciseList() {
       <div class="ex-num ${entry.disabled ? 'ex-num-off' : ''}">${num}</div>
       <div class="ex-body">
         <div class="ex-name">${ex.name}</div>
-        <div class="ex-meta">${ex.sets} set${ex.sets!==1?'s':''} · 
-          ${ex.focusAreas.map(f=>f.name).join(', ')} · 
-          ${ex.focusAreas[0]?.reps||0} reps · ${ex.activity}</div>
+        <div class="ex-meta">${ex.sets}*(${ex.focusAreas[0]?.reps||0} ${pluralWord(ex.activity)} of ${ex.focusAreas[0]?.holdTime||0}secs): ${ex.focusAreas.map(f=>f.name).filter(n=>n).join(', ')}</div>
       </div>
       <div class="ex-toggle-btn" title="${entry.disabled ? 'Tap to enable' : 'Tap to skip'}">${entry.disabled ? '＋' : '−'}</div>`;
 
