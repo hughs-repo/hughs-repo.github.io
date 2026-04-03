@@ -4,49 +4,49 @@
 const DEFAULT_CFG = `
 [exercise.1]
 name                = Quad stretch in lying
-requirement         = You must be lying flat on your back with one leg hanging off the bed and a towel ready to pull the leg back
+requirement         = You must be lying face up on the edge of your bed. Drop one leg over the edge of the bed, with a towel around your ankle, ready to pull the leg back. You should feel the stretch at the front of your thigh
 between_focus_time  = 15
 sets                = 2
 activity            = pull
 
 [exercise.1.focus.1]
 name       = left leg
-intro      = Please lie down with your left leg hanging off the bed
+intro      = Please lie down with your left leg hanging off the edge of the bed
 hold_time  = 10
 relax_time = 5
 reps       = 5
 
 [exercise.1.focus.2]
 name       = right leg
-intro      = Please lie down with your right leg hanging off the bed
+intro      = Please lie down with your right leg hanging off the edge of the bed
 hold_time  = 10
 relax_time = 5
 reps       = 5
 
 [exercise.2]
 name                = Straight leg raise
-requirement         = You must be lying flat on your back with a rolled up towel under the focus leg at the thigh, and the rubber stretchy band between the legs at the ankles
+requirement         = Start with the resistance band between your legs at the ankles. Then lie face up with a rolled up towel under the left thigh. Squeeze your knee down into the towel to  tighten your thigh muscle, pointing your toes and ankle upwards. When you do the exercie you willlift your leg to 30 degrees without bending your leg.
 between_focus_time  = 15
 sets                = 2
 activity            = lift
 
 [exercise.2.focus.1]
 name       = left leg
-intro      = Please lie down with the rolled towel under your left thigh. When I tell you, lift your left leg tensioning the band
+intro      = Please place the rolled towel under your left thigh. When I tell you, lift your left leg tensioning the band
 hold_time  = 5
 relax_time = 5
 reps       = 10
 
 [exercise.2.focus.2]
 name       = right leg
-intro      = Please lie down with the rolled towel under your right thigh. When I tell you, lift your right leg tensioning the band
+intro      = Please place the rolled towel under your right thigh. When I tell you, lift your right leg tensioning the band
 hold_time  = 5
 relax_time = 5
 reps       = 10
 
 [exercise.3]
 name                = Supine hip abduction with band
-requirement         = You must be lying flat on your back with the rubber stretchy band between the legs at the ankles
+requirement         = Lie face up with the resistance band between the legs at the ankles. To begin, you will be sliding your left leg out sideways
 between_focus_time  = 15
 sets                = 2
 activity            = stretch
@@ -67,7 +67,7 @@ reps       = 10
 
 [exercise.4]
 name                = Double heel leg rise
-requirement         = With this exercise you will be standing straight and perhaps gently holding on to a table or chair for balance. You will rise up on your toes, keeping your legs straight and relax.
+requirement         = With this exercise you will be standing straight and perhaps gently holding on to a table or chair for balance. You will push through your toes, lifting your heels off the ground as high as you can
 between_focus_time  = 15
 sets                = 2
 activity            = Rise
