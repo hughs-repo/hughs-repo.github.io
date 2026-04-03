@@ -15,25 +15,71 @@
     <p>Follow along — your exercises will be spoken aloud</p>
   </header>
 
+  <!-- ═══ USER BAR (shown when logged in) ═══ -->
+  <div class="user-bar hidden" id="user-bar">
+    <div class="user-bar-left">
+      <span class="user-bar-icon">👤</span>
+      <span class="user-bar-name" id="user-bar-name">—</span>
+      <span class="user-bar-role-badge" id="user-bar-role">user</span>
+    </div>
+    <div class="user-bar-right">
+      <button class="btn-user-action" id="btn-change-password">Change Password</button>
+      <button class="btn-user-action btn-manage-users hidden" id="btn-manage-users">Manage Users</button>
+      <button class="btn-user-action btn-logout" id="btn-logout">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- ═══ LOGIN SCREEN ═══ -->
+  <div id="screen-login" class="screen-active">
+    <div class="card login-card">
+      <div class="login-icon">🏋️</div>
+      <h2 class="login-title">Welcome back</h2>
+      <p class="login-hint">Sign in to access your exercises</p>
+      <div id="login-error" class="form-error hidden"></div>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" autocomplete="username"
+                 placeholder="Username" required>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" autocomplete="current-password"
+                 placeholder="Password" required>
+        </div>
+        <button type="submit" class="btn-primary" id="btn-login">Sign In</button>
+      </form>
+    </div>
+  </div>
+
   <!-- ═══ SETUP SCREEN ═══ -->
-  <div id="screen-setup" class="screen-active">
+  <div id="screen-setup">
 
     <div class="speech-warn" id="speech-warn">
       ⚠ Your browser may not support speech. Please use Chrome, Edge, or Safari for the best experience.
     </div>
 
-    <div class="card">
-      <div class="section-label">Load your exercises</div>
-      <div class="upload-zone" id="upload-zone">
-        <input type="file" id="cfg-file" accept=".cfg,.txt,.ini">
-        <span class="upload-icon">📋</span>
-        <h3>Drop your exercises.cfg here</h3>
-        <p>or click to browse</p>
+    <!-- Upload section: visible to admins only -->
+    <div id="upload-section">
+      <div class="card">
+        <div class="section-label">Load your exercises</div>
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="cfg-file" accept=".cfg,.txt,.ini">
+          <span class="upload-icon">📋</span>
+          <h3>Drop your exercises.cfg here</h3>
+          <p>or click to browse</p>
+        </div>
+        <div class="cfg-status hidden" id="cfg-status"></div>
+        <p class="cfg-hint">
+          No file? <button class="btn-link" id="btn-use-default">Use the built-in sample exercises</button>
+        </p>
       </div>
-      <div class="cfg-status hidden" id="cfg-status"></div>
-      <p class="cfg-hint">
-        No file? <button class="btn-link" id="btn-use-default">Use the built-in sample exercises</button>
-      </p>
+    </div>
+
+    <!-- Config info: visible to ordinary users (their personal config is auto-loaded) -->
+    <div id="user-cfg-info" class="card hidden">
+      <div class="section-label">Your exercise configuration</div>
+      <div class="cfg-user-status" id="user-cfg-status"></div>
     </div>
 
     <div class="card hidden" id="preview-card">
@@ -117,6 +163,16 @@
     <button class="btn-again" id="btn-again">Start Another Session</button>
   </div>
 
+  <!-- ═══ USER MANAGEMENT SCREEN (admin only) ═══ -->
+  <div id="screen-user-mgmt">
+    <div class="card">
+      <div class="section-label">User Management</div>
+      <div id="user-list-container"></div>
+      <button class="btn-primary btn-add-user-open" id="btn-open-add-user">+ Add User</button>
+    </div>
+    <button class="btn-secondary btn-back" id="btn-back-to-setup">← Back to Setup</button>
+  </div>
+
 </div>
 
 <!-- ═══ PAUSE OVERLAY ═══ -->
@@ -128,6 +184,85 @@
   </div>
 </div>
 
+<!-- ═══ CHANGE PASSWORD MODAL ═══ -->
+<div class="modal-overlay" id="change-password-overlay">
+  <div class="modal-box">
+    <h2 class="modal-title">Change Password</h2>
+    <div id="change-pw-error" class="form-error hidden"></div>
+    <form id="change-password-form">
+      <div class="form-group">
+        <label for="cp-current">Current Password</label>
+        <input type="password" id="cp-current" placeholder="Current password" required>
+      </div>
+      <div class="form-group">
+        <label for="cp-new">New Password</label>
+        <input type="password" id="cp-new" placeholder="New password (min 8 characters)" required>
+      </div>
+      <div class="form-group">
+        <label for="cp-confirm">Confirm New Password</label>
+        <input type="password" id="cp-confirm" placeholder="Confirm new password" required>
+      </div>
+      <div class="modal-buttons">
+        <button type="submit" class="btn-primary">Change Password</button>
+        <button type="button" class="btn-secondary" id="btn-cancel-change-pw">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ ADD USER MODAL (admin only) ═══ -->
+<div class="modal-overlay" id="add-user-overlay">
+  <div class="modal-box">
+    <h2 class="modal-title">Add User</h2>
+    <div id="add-user-error" class="form-error hidden"></div>
+    <form id="add-user-form">
+      <div class="form-group">
+        <label for="au-username">Username</label>
+        <input type="text" id="au-username" placeholder="Username" autocomplete="off" required>
+      </div>
+      <div class="form-group">
+        <label for="au-password">Password</label>
+        <input type="password" id="au-password" placeholder="Password (min 8 characters)" required>
+      </div>
+      <div class="form-group">
+        <label for="au-role">Role</label>
+        <select id="au-role">
+          <option value="user">User (ordinary)</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="modal-buttons">
+        <button type="submit" class="btn-primary">Add User</button>
+        <button type="button" class="btn-secondary" id="btn-cancel-add-user">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ SET USER PASSWORD MODAL (admin only) ═══ -->
+<div class="modal-overlay" id="set-password-overlay">
+  <div class="modal-box">
+    <h2 class="modal-title">Set Password for <span id="set-pw-username-label"></span></h2>
+    <div id="set-pw-error" class="form-error hidden"></div>
+    <form id="set-password-form">
+      <div class="form-group">
+        <label for="sp-new">New Password</label>
+        <input type="password" id="sp-new" placeholder="New password (min 8 characters)" required>
+      </div>
+      <div class="form-group">
+        <label for="sp-confirm">Confirm Password</label>
+        <input type="password" id="sp-confirm" placeholder="Confirm new password" required>
+      </div>
+      <div class="modal-buttons">
+        <button type="submit" class="btn-primary">Set Password</button>
+        <button type="button" class="btn-secondary" id="btn-cancel-set-pw">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script src="user-manager.js"></script>
 <script src="exercise_timer.js"></script>
 </body>
 </html>

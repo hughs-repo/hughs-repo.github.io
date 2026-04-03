@@ -516,10 +516,13 @@ let exerciseOrder = [];  // indices into exercises[], in display order
 // enabled state stored on each element as .disabled = true/false
 
 function showScreen(id) {
-  ['screen-setup','screen-session','screen-done'].forEach(s => {
+  ['screen-login','screen-setup','screen-session','screen-done','screen-user-mgmt'].forEach(s => {
     const el = document.getElementById(s);
-    el.classList.toggle('screen-active', s === id);
+    if (el) el.classList.toggle('screen-active', s === id);
   });
+  // Show user bar for all screens except login
+  const userBar = document.getElementById('user-bar');
+  if (userBar) userBar.classList.toggle('hidden', id === 'screen-login');
 }
 
 function startSession() {
@@ -759,10 +762,340 @@ function attachDrag(li, list, visualIdx) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// APP INIT  —  called once after a successful login
+// ═══════════════════════════════════════════════════════════════════════════
+function initApp(session) {
+  // Update user bar
+  document.getElementById('user-bar-name').textContent = session.username;
+  const roleBadge = document.getElementById('user-bar-role');
+  roleBadge.textContent = session.role;
+  roleBadge.className   = 'user-bar-role-badge role-' + session.role;
+
+  // Show / hide admin-only controls
+  document.getElementById('btn-manage-users')
+    .classList.toggle('hidden', session.role !== 'admin');
+
+  const uploadSection = document.getElementById('upload-section');
+  const userCfgInfo   = document.getElementById('user-cfg-info');
+
+  if (session.role === 'admin') {
+    uploadSection.classList.remove('hidden');
+    userCfgInfo.classList.add('hidden');
+  } else {
+    // Ordinary users: hide upload zone, auto-load personal config
+    uploadSection.classList.add('hidden');
+    userCfgInfo.classList.remove('hidden');
+
+    const cfg = UserManager.getUserConfig(session.username);
+    if (cfg) {
+      document.getElementById('user-cfg-status').textContent =
+        `✓ Your personal configuration is loaded (${session.username}.cfg)`;
+      loadCfg(cfg, session.username + '.cfg');
+    } else {
+      // Provision config from default on first login
+      document.getElementById('user-cfg-status').textContent = 'Loading your configuration…';
+      fetch('exercise-scripts/default-config.cfg')
+        .then(r => r.text())
+        .then(text => {
+          UserManager.setUserConfig(session.username, text);
+          document.getElementById('user-cfg-status').textContent =
+            `✓ Your personal configuration is loaded (${session.username}.cfg)`;
+          loadCfg(text, session.username + '.cfg');
+        })
+        .catch(() => {
+          document.getElementById('user-cfg-status').textContent =
+            '⚠ Could not load configuration. Please contact your admin.';
+        });
+    }
+  }
+
+  showScreen('screen-setup');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// USER MANAGEMENT  —  render the user list and wire action buttons
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Escape a string so it is safe to set as textContent (belt-and-braces).
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function renderUserList() {
+  const container  = document.getElementById('user-list-container');
+  const users      = Auth.getUsers();
+  const currentUser = Auth.getSession().username;
+
+  container.innerHTML = '';
+
+  if (users.length === 0) {
+    container.innerHTML = '<p class="user-list-empty">No users found.</p>';
+    return;
+  }
+
+  const ul = document.createElement('ul');
+  ul.className = 'user-list';
+
+  users.forEach(user => {
+    const isMe = user.username === currentUser;
+    const li   = document.createElement('li');
+    li.className = 'user-list-item';
+
+    // Build info section using DOM methods to avoid XSS
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'user-list-info';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className   = 'user-list-name';
+    nameSpan.textContent = user.username;
+
+    const roleBadge = document.createElement('span');
+    roleBadge.className   = 'user-list-role-badge role-' + escapeHtml(user.role);
+    roleBadge.textContent = user.role;
+
+    infoDiv.appendChild(nameSpan);
+    infoDiv.appendChild(roleBadge);
+    if (isMe) {
+      const youSpan = document.createElement('span');
+      youSpan.className   = 'user-list-you';
+      youSpan.textContent = '(you)';
+      infoDiv.appendChild(youSpan);
+    }
+
+    // Build actions section using DOM methods
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'user-list-actions';
+
+    const setPwBtn = document.createElement('button');
+    setPwBtn.className            = 'btn-user-list-action btn-set-pw';
+    setPwBtn.textContent          = 'Set Password';
+    setPwBtn.dataset.username     = user.username;
+    actionsDiv.appendChild(setPwBtn);
+
+    if (!isMe) {
+      const delBtn = document.createElement('button');
+      delBtn.className        = 'btn-user-list-action btn-delete-user';
+      delBtn.textContent      = 'Delete';
+      delBtn.dataset.username = user.username;
+      actionsDiv.appendChild(delBtn);
+    }
+
+    li.appendChild(infoDiv);
+    li.appendChild(actionsDiv);
+    ul.appendChild(li);
+  });
+
+  container.appendChild(ul);
+
+  // Wire Set Password buttons
+  container.querySelectorAll('.btn-set-pw').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const label = document.getElementById('set-pw-username-label');
+      label.textContent       = btn.dataset.username;
+      label.dataset.username  = btn.dataset.username;
+      document.getElementById('set-pw-error').classList.add('hidden');
+      document.getElementById('set-password-form').reset();
+      document.getElementById('set-password-overlay').classList.add('active');
+    });
+  });
+
+  // Wire Delete buttons
+  container.querySelectorAll('.btn-delete-user').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const username = btn.dataset.username;
+      if (!confirm(`Delete user "${username}"? This cannot be undone.`)) return;
+      const result = UserManager.deleteUser(username);
+      if (!result.ok) {
+        alert(result.reason);
+      } else {
+        renderUserList();
+      }
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // EVENT WIRING
 // ═══════════════════════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initSpeech();
+
+  // ── Auth bootstrap ────────────────────────────────────────────────────────
+  await Auth.ensureDefaultAdmin();
+
+  // If there is already a live session (e.g. page refresh), skip the login screen
+  const existingSession = Auth.getSession();
+  if (existingSession) {
+    initApp(existingSession);
+  }
+
+  // ── Login form ────────────────────────────────────────────────────────────
+  document.getElementById('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errorEl  = document.getElementById('login-error');
+    errorEl.classList.add('hidden');
+    errorEl.textContent = '';
+
+    const session = await Auth.login(username, password);
+    if (session) {
+      document.getElementById('login-password').value = '';
+      initApp(session);
+    } else {
+      errorEl.textContent = 'Incorrect username or password.';
+      errorEl.classList.remove('hidden');
+    }
+  });
+
+  // ── Logout ────────────────────────────────────────────────────────────────
+  document.getElementById('btn-logout').addEventListener('click', () => {
+    Auth.logout();
+    // Reset the setup screen for the next login
+    exercises = [];
+    exerciseOrder = [];
+    document.getElementById('preview-card').classList.add('hidden');
+    document.getElementById('btn-start').disabled = true;
+    const zone = document.getElementById('upload-zone');
+    zone.classList.remove('loaded');
+    zone.querySelector('h3').textContent = 'Drop your exercises.cfg here';
+    zone.querySelector('p').textContent  = 'or click to browse';
+    zone.querySelector('.upload-icon').textContent = '📋';
+    document.getElementById('cfg-status').classList.add('hidden');
+    document.getElementById('login-username').value = '';
+    document.getElementById('login-password').value = '';
+    showScreen('screen-login');
+  });
+
+  // ── Change own password ───────────────────────────────────────────────────
+  document.getElementById('btn-change-password').addEventListener('click', () => {
+    document.getElementById('change-pw-error').classList.add('hidden');
+    document.getElementById('change-password-form').reset();
+    document.getElementById('change-password-overlay').classList.add('active');
+  });
+
+  document.getElementById('btn-cancel-change-pw').addEventListener('click', () => {
+    document.getElementById('change-password-overlay').classList.remove('active');
+  });
+
+  document.getElementById('change-password-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const session  = Auth.getSession();
+    const current  = document.getElementById('cp-current').value;
+    const newPw    = document.getElementById('cp-new').value;
+    const confirm  = document.getElementById('cp-confirm').value;
+    const errorEl  = document.getElementById('change-pw-error');
+    errorEl.classList.add('hidden');
+
+    if (newPw !== confirm) {
+      errorEl.textContent = 'New passwords do not match.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+    if (newPw.length < 8) {
+      errorEl.textContent = 'New password must be at least 8 characters.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+    const ok = await Auth.changePassword(session.username, current, newPw);
+    if (ok) {
+      document.getElementById('change-password-overlay').classList.remove('active');
+      alert('Password changed successfully.');
+    } else {
+      errorEl.textContent = 'Current password is incorrect.';
+      errorEl.classList.remove('hidden');
+    }
+  });
+
+  // ── User management (admin only) ──────────────────────────────────────────
+  document.getElementById('btn-manage-users').addEventListener('click', () => {
+    renderUserList();
+    showScreen('screen-user-mgmt');
+  });
+
+  document.getElementById('btn-back-to-setup').addEventListener('click', () => {
+    showScreen('screen-setup');
+  });
+
+  // Add user
+  document.getElementById('btn-open-add-user').addEventListener('click', () => {
+    document.getElementById('add-user-error').classList.add('hidden');
+    document.getElementById('add-user-form').reset();
+    document.getElementById('add-user-overlay').classList.add('active');
+  });
+
+  document.getElementById('btn-cancel-add-user').addEventListener('click', () => {
+    document.getElementById('add-user-overlay').classList.remove('active');
+  });
+
+  document.getElementById('add-user-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const username = document.getElementById('au-username').value.trim();
+    const password = document.getElementById('au-password').value;
+    const role     = document.getElementById('au-role').value;
+    const errorEl  = document.getElementById('add-user-error');
+    errorEl.classList.add('hidden');
+
+    if (!username) {
+      errorEl.textContent = 'Username is required.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+    if (password.length < 8) {
+      errorEl.textContent = 'Password must be at least 8 characters.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    // Fetch default config to copy for the new user
+    let defaultCfg = null;
+    try {
+      const r = await fetch('exercise-scripts/default-config.cfg');
+      defaultCfg = await r.text();
+    } catch (_) { /* silently continue without a config */ }
+
+    const result = await UserManager.addUser(username, password, role, defaultCfg);
+    if (result.ok) {
+      document.getElementById('add-user-overlay').classList.remove('active');
+      renderUserList();
+    } else {
+      errorEl.textContent = result.reason;
+      errorEl.classList.remove('hidden');
+    }
+  });
+
+  // Set user password (admin)
+  document.getElementById('btn-cancel-set-pw').addEventListener('click', () => {
+    document.getElementById('set-password-overlay').classList.remove('active');
+  });
+
+  document.getElementById('set-password-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const label    = document.getElementById('set-pw-username-label');
+    const username = label.dataset.username;
+    const newPw    = document.getElementById('sp-new').value;
+    const confirm  = document.getElementById('sp-confirm').value;
+    const errorEl  = document.getElementById('set-pw-error');
+    errorEl.classList.add('hidden');
+
+    if (newPw !== confirm) {
+      errorEl.textContent = 'Passwords do not match.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+    if (newPw.length < 8) {
+      errorEl.textContent = 'Password must be at least 8 characters.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+    await Auth.adminSetPassword(username, newPw);
+    document.getElementById('set-password-overlay').classList.remove('active');
+    alert(`Password for "${username}" has been updated.`);
+  });
 
   // File upload
   const fileInput = document.getElementById('cfg-file');
