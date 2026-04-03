@@ -128,6 +128,10 @@ document.addEventListener('click', function (e) {
   if (!input || (input.type !== 'password' && input.type !== 'text')) return;
   const show = input.type === 'password';
   input.type = show ? 'text' : 'password';
+  // Re-apply after type change: some mobile browsers reset these when type changes.
+  input.setAttribute('autocapitalize', 'none');
+  input.setAttribute('autocorrect', 'off');
+  input.setAttribute('spellcheck', 'false');
   btn.textContent = show ? '🙈' : '👁';
   btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
   btn.classList.toggle('pw-visible', show);

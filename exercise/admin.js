@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const username = document.getElementById('au-username').value.trim();
     const fullName = document.getElementById('au-fullname').value.trim();
-    const password = document.getElementById('au-password').value;
+    const password = document.getElementById('au-password').value.trim();
     const role     = document.getElementById('au-role').value;
     const errorEl  = document.getElementById('add-user-error');
     errorEl.classList.add('hidden');
@@ -420,8 +420,8 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const label    = document.getElementById('set-pw-username-label');
     const username = label.dataset.username;
-    const newPw    = document.getElementById('sp-new').value;
-    const confirm  = document.getElementById('sp-confirm').value;
+    const newPw    = document.getElementById('sp-new').value.trim();
+    const confirm  = document.getElementById('sp-confirm').value.trim();
     const errorEl  = document.getElementById('set-pw-error');
     errorEl.classList.add('hidden');
 

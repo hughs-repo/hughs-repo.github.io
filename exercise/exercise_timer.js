@@ -836,7 +836,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('login-form').addEventListener('submit', async e => {
     e.preventDefault();
     const username = document.getElementById('login-username').value.trim();
-    const password = document.getElementById('login-password').value;
+    const password = document.getElementById('login-password').value.trim();
     const errorEl  = document.getElementById('login-error');
     errorEl.classList.add('hidden');
     errorEl.textContent = '';
@@ -884,9 +884,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('change-password-form').addEventListener('submit', async e => {
     e.preventDefault();
     const session  = Auth.getSession();
-    const current  = document.getElementById('cp-current').value;
-    const newPw    = document.getElementById('cp-new').value;
-    const confirm  = document.getElementById('cp-confirm').value;
+    const current  = document.getElementById('cp-current').value.trim();
+    const newPw    = document.getElementById('cp-new').value.trim();
+    const confirm  = document.getElementById('cp-confirm').value.trim();
     const errorEl  = document.getElementById('change-pw-error');
     errorEl.classList.add('hidden');
 
