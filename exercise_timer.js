@@ -491,7 +491,6 @@ async function runSession(exercises) {
           // between onend firing and audio actually stopping is absorbed.
           setTag('tag-hold', `Hold — rep ${rep} of ${fa.reps}`);
           const activityWord = ex.activity.charAt(0).toUpperCase() + ex.activity.slice(1);
-          setMain(activityWord);
           setSub(`Hold for ${fa.holdTime} seconds`);
           setRing(true, 0, false);
           setRingNum(1);
@@ -508,6 +507,8 @@ async function runSession(exercises) {
             setRing(true, pct, false);
             setRingNum(count);
             const word = count === 1 ? activityWord : countWord(count);
+            // Show activity word on screen only when it is about to be spoken
+            if (count === 1) setMain(activityWord);
             await speakThenWait(word, 1000);
           }
 
