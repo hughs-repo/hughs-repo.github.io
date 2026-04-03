@@ -67,23 +67,33 @@ const Auth = (() => {
     }
   }
 
+  const SESSION_DAYS = 30;
+
   // ── Login / logout ───────────────────────────────────────────────────────
   async function login(username, password) {
     const lc   = username.toLowerCase();
     const user = getUsers().find(u => u.username.toLowerCase() === lc);
     if (!user) return null;
     if (!(await verifyPassword(password, user))) return null;
-    const session = { username: user.username, role: user.role };
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    const expires = Date.now() + SESSION_DAYS * 86400000;
+    const session = { username: user.username, role: user.role, expires };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
     return session;
   }
 
-  function logout() { sessionStorage.removeItem(SESSION_KEY); }
+  function logout() { localStorage.removeItem(SESSION_KEY); }
 
   // ── Current session ──────────────────────────────────────────────────────
   function getSession() {
-    try   { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null'); }
-    catch { return null; }
+    try {
+      const session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+      if (!session) return null;
+      if (session.expires && Date.now() > session.expires) {
+        localStorage.removeItem(SESSION_KEY);
+        return null;
+      }
+      return session;
+    } catch { return null; }
   }
 
   function isAdmin() { const s = getSession(); return s !== null && s.role === 'admin'; }
