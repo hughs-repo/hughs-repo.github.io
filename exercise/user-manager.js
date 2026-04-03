@@ -20,15 +20,25 @@ const UserManager = (() => {
 
   // Create a new user and copy defaultCfgText as their personal config.
   // Returns { ok: true } or { ok: false, reason: string }.
-  async function addUser(username, password, role, defaultCfgText) {
+  async function addUser(username, password, role, fullName, defaultCfgText) {
     const users = Auth.getUsers();
     if (users.find(u => u.username === username))
       return { ok: false, reason: 'Username already exists.' };
     const entry = await Auth.createPasswordEntry(password);
-    users.push({ username, ...entry, role });
+    users.push({ username, ...entry, role, fullName: fullName || '' });
     Auth.saveUsers(users);
     if (defaultCfgText != null) setUserConfig(username, defaultCfgText);
     return { ok: true };
+  }
+
+  // Update a user's full name (admin action).
+  function setUserFullName(username, fullName) {
+    const users = Auth.getUsers();
+    const user  = users.find(u => u.username === username);
+    if (!user) return false;
+    user.fullName = fullName || '';
+    Auth.saveUsers(users);
+    return true;
   }
 
   // Delete a user; refuses to remove the last admin.
@@ -55,5 +65,5 @@ const UserManager = (() => {
     return true;
   }
 
-  return { getUserConfig, setUserConfig, addUser, deleteUser, setUserRole };
+  return { getUserConfig, setUserConfig, addUser, deleteUser, setUserRole, setUserFullName };
 })();

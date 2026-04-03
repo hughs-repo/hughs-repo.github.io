@@ -173,6 +173,29 @@
     <button class="btn-secondary btn-back" id="btn-back-to-setup">← Back to Setup</button>
   </div>
 
+  <!-- ═══ EDIT USER CONFIG SCREEN (admin only) ═══ -->
+  <div id="screen-edit-user-cfg">
+    <div class="card">
+      <div class="section-label">Editing config for <span id="edit-cfg-username"></span></div>
+
+      <div class="form-group">
+        <label for="edit-cfg-fullname">Full Name <span class="label-optional">(optional)</span></label>
+        <input type="text" id="edit-cfg-fullname" placeholder="e.g. Jane Smith" autocomplete="off">
+      </div>
+
+      <div class="section-label edit-section-mt">Exercise Configuration</div>
+      <ul class="exercise-preview" id="edit-exercise-preview"></ul>
+      <p class="preview-hint">Greyed-out exercises will be removed when saved. Drag &#8942; to reorder.</p>
+
+      <div class="edit-cfg-actions">
+        <button class="btn-link" id="btn-reset-to-default">⟳ Reset to Default Config</button>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btn-save-user-cfg">Save Changes</button>
+    <button class="btn-secondary btn-back" id="btn-cancel-edit-cfg">← Back without Saving</button>
+  </div>
+
 </div>
 
 <!-- ═══ PAUSE OVERLAY ═══ -->
@@ -221,6 +244,10 @@
         <input type="text" id="au-username" placeholder="Username" autocomplete="off" required>
       </div>
       <div class="form-group">
+        <label for="au-fullname">Full Name <span class="label-optional">(optional)</span></label>
+        <input type="text" id="au-fullname" placeholder="e.g. Jane Smith" autocomplete="off">
+      </div>
+      <div class="form-group">
         <label for="au-password">Password</label>
         <input type="password" id="au-password" placeholder="Password (min 8 characters)" required>
       </div>
@@ -264,5 +291,6 @@
 <script src="auth.js"></script>
 <script src="user-manager.js"></script>
 <script src="exercise_timer.js"></script>
+<script src="admin.js"></script>
 </body>
 </html>

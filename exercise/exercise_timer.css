@@ -794,3 +794,85 @@
     padding: 4px 0;
   }
 
+  /* ── Edit user config screen ── */
+  #screen-edit-user-cfg { display: none; flex-direction: column; gap: 16px; }
+  #screen-edit-user-cfg.screen-active { display: flex; }
+
+  .edit-section-mt { margin-top: 20px; }
+
+  .edit-cfg-actions { margin-top: 10px; }
+
+  /* Label "optional" hint */
+  .label-optional {
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
+  /* Exercise item header row (name + sets input) */
+  .ex-header-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* Focus-area parameter row inside an exercise item */
+  .ex-focus-area-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px solid var(--surface2);
+  }
+
+  .ex-focus-label {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    font-style: italic;
+    min-width: 60px;
+    flex-shrink: 0;
+  }
+
+  /* Compact label + input pair */
+  .ex-inline-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .ex-inline-input {
+    width: 48px;
+    padding: 3px 6px;
+    border: 1.5px solid var(--ink-faint);
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    color: var(--ink);
+    background: var(--surface);
+    text-align: center;
+    outline: none;
+    -moz-appearance: textfield;
+  }
+  .ex-inline-input::-webkit-inner-spin-button,
+  .ex-inline-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .ex-inline-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(45,106,79,0.1); }
+
+  /* Empty-state message in the edit list */
+  .edit-cfg-empty {
+    list-style: none;
+    font-size: 0.88rem;
+    color: var(--ink-faint);
+    font-style: italic;
+    padding: 8px 0;
+  }
+
