@@ -69,7 +69,8 @@ const Auth = (() => {
 
   // ── Login / logout ───────────────────────────────────────────────────────
   async function login(username, password) {
-    const user = getUsers().find(u => u.username === username);
+    const lc   = username.toLowerCase();
+    const user = getUsers().find(u => u.username.toLowerCase() === lc);
     if (!user) return null;
     if (!(await verifyPassword(password, user))) return null;
     const session = { username: user.username, role: user.role };
@@ -117,4 +118,18 @@ const Auth = (() => {
     getUsers, saveUsers, createPasswordEntry,
   };
 })();
+
+// ── Password visibility toggle (eye button) ──────────────────────────────────
+// Delegated from document so it works for modals added at any time.
+document.addEventListener('click', function (e) {
+  const btn = e.target.closest('.btn-pw-toggle');
+  if (!btn) return;
+  const input = btn.closest('.pw-wrap').querySelector('input');
+  if (!input || (input.type !== 'password' && input.type !== 'text')) return;
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.textContent = show ? '🙈' : '👁';
+  btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  btn.classList.toggle('pw-visible', show);
+});
 
