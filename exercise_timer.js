@@ -491,15 +491,16 @@ async function runSession(exercises) {
           // between onend firing and audio actually stopping is absorbed.
           setTag('tag-hold', `Hold — rep ${rep} of ${fa.reps}`);
           const activityWord = ex.activity.charAt(0).toUpperCase() + ex.activity.slice(1);
-          setMain(`OK. ${activityWord}`);
+          setMain(activityWord);
           setSub(`Hold for ${fa.holdTime} seconds`);
           setRing(true, 0, false);
           setRingNum(1);
 
-          // Say "OK." and wait for the remainder of the first two beats,
-          // then say the activity name ("Pull" etc.) at the 2-second mark,
-          // followed by the numeric count — all evenly spaced at 1-second intervals.
-          await speakThenWait('OK.', 1500);
+          // When relax_time >= 4, say "OK." and wait before the activity word;
+          // skip "OK." entirely for fast exercises (relax_time < 4).
+          if (fa.relaxTime >= 4) {
+            await speakThenWait('OK.', 1500);
+          }
 
           for (let count = 1; count <= fa.holdTime && !stopped; count++) {
             // Ring fills up: empty at count=1, full at count=holdTime
