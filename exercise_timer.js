@@ -171,6 +171,11 @@ function pluralWord(w) {
   return lw + 's';
 }
 function titleCase(s) { return s.replace(/\b\w/g, c => c.toUpperCase()); }
+function naturalList(items) {
+  if (items.length <= 1) return items[0] || '';
+  if (items.length === 2) return `${items[0]}, and ${items[1]}`;
+  return items.slice(0, -1).join(', ') + ', and ' + items[items.length - 1];
+}
 function formatDuration(sec) {
   sec = Math.round(sec);
   const m = Math.floor(sec / 60), s = sec % 60;
@@ -438,7 +443,7 @@ async function runSession(exercises) {
 
     const nSets  = ex.sets;
     const nAreas = ex.focusAreas.length;
-    const areaNames = ex.focusAreas.map(f => f.name).join(', ');
+    const areaNames = naturalList(ex.focusAreas.map(f => `the ${f.name}`));
     await speak(
       `We will do ${plural(nSets,'set')} of ${plural(nAreas,'focus area')}: ${areaNames}.`
     );
