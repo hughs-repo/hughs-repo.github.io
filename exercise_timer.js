@@ -73,7 +73,7 @@ sets                = 2
 activity            = Rise
 
 [exercise.4.focus.1]
-name       = both legs
+name       = legs
 intro      = When I tell you, rise up on your toes, and then relax back down
 hold_time  = 2
 relax_time = 2
